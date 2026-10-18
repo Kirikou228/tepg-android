@@ -33,14 +33,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
-      - name: Décoder le keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
-      - name: Build release signé (APK + AAB)
-        env:
-          KEYSTORE_FILE: ${{ runner.temp }}/release.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Build release (APK + AAB), signé avec la clé fixe
         run: gradle assembleRelease bundleRelease
       - uses: actions/upload-artifact@v4
         with:

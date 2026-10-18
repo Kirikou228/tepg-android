@@ -6,3 +6,4 @@ keystore.properties
 *.jks
 *.keystore
 *.b64
+!app/tepg-fixed.jks

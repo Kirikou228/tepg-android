@@ -18,8 +18,8 @@ android {
         applicationId 'com.tepg.app'
         minSdk 24
         targetSdk 34
-        versionCode 3
-        versionName '1.2'
+        versionCode 4
+        versionName '1.2.1'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -27,6 +27,13 @@ android {
     }
 
     signingConfigs {
+        // Clé fixe (dans le dépôt) : même signature à chaque build => mises à jour possibles
+        fixed {
+            storeFile file('tepg-fixed.jks')
+            storePassword 'tepg2024'
+            keyAlias 'tepg'
+            keyPassword 'tepg2024'
+        }
         release {
             def path = sign('KEYSTORE_FILE', 'storeFile')
             if (path) {
@@ -39,11 +46,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.fixed
+        }
         release {
             // Pas de minification : app minuscule, et l'interface JS (Android.print) y serait exposée à un risque
             minifyEnabled false
             if (sign('KEYSTORE_FILE', 'storeFile')) {
                 signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.fixed
             }
         }
     }
