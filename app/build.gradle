@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Identifiants de signature : variables d'environnement (CI) ou keystore.properties (local)
+def keystoreProps = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
+if (keystoreFile.exists()) {
+    keystoreFile.withInputStream { keystoreProps.load(it) }
+}
+def sign = { String env, String prop -> System.getenv(env) ?: keystoreProps[prop] }
+
+android {
+    namespace 'com.tepg.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.tepg.app'
+        minSdk 24
+        targetSdk 34
+        versionCode 3
+        versionName '1.2'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    signingConfigs {
+        release {
+            def path = sign('KEYSTORE_FILE', 'storeFile')
+            if (path) {
+                storeFile rootProject.file(path)
+                storePassword sign('KEYSTORE_PASSWORD', 'storePassword')
+                keyAlias sign('KEY_ALIAS', 'keyAlias')
+                keyPassword sign('KEY_PASSWORD', 'keyPassword')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Pas de minification : app minuscule, et l'interface JS (Android.print) y serait exposée à un risque
+            minifyEnabled false
+            if (sign('KEYSTORE_FILE', 'storeFile')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
